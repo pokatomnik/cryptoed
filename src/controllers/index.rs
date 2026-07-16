@@ -15,7 +15,13 @@ impl Controller for IndexController {
     async fn handle(&self) -> anyhow::Result<()> {
         let editor_config = EditorConfig::new().with_path(self.path.as_ref());
         let result = run_editor(editor_config).await?;
-        println!("{}", result);
+
+        match result.reason() {
+            crate::editor::outcome::FinishReason::SaveAndExit
+            | crate::editor::outcome::FinishReason::Exit => {
+                println!("{}", result.text());
+            }
+        }
         Ok(())
     }
 }

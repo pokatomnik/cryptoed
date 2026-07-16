@@ -1,2 +1,4 @@
-pub(crate) mod text_editor;
-pub(crate) mod ui;
+pub(crate) mod component;
+pub(crate) mod components;
+pub(crate) mod keymap;
+pub(crate) mod screen;
