@@ -4,7 +4,7 @@ use crate::{cmd::cli, controllers::controller::Controller};
 
 mod cmd;
 mod controllers;
-mod editor;
+mod use_cases;
 
 #[tokio::main]
 async fn main() {

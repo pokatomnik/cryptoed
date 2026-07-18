@@ -1,9 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{
-    controllers::controller::Controller,
-    editor::{editor::run_editor, editor_config::EditorConfig},
-};
+use crate::{controllers::controller::Controller, use_cases::editor::editor::run_editor};
 use clap::Args;
 
 #[derive(Args)]
@@ -13,15 +10,9 @@ pub(crate) struct IndexController {
 
 impl Controller for IndexController {
     async fn handle(&self) -> anyhow::Result<()> {
-        let editor_config = EditorConfig::new().with_path(self.path.as_ref());
-        let result = run_editor(editor_config).await?;
+        let result = run_editor("Hello".to_string());
 
-        match result.reason() {
-            crate::editor::outcome::FinishReason::SaveAndExit
-            | crate::editor::outcome::FinishReason::Exit => {
-                println!("{}", result.text());
-            }
-        }
+        println!("{}", result);
         Ok(())
     }
 }
