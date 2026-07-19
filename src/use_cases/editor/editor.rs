@@ -6,17 +6,13 @@ use crate::shared::terminal_ext::TerminalExt;
 use crate::use_cases::editor::widgets::editor_view::EditorView;
 use crate::use_cases::editor::widgets::shortcut_view::ShortcutView;
 
-use cursive::With;
-use cursive::direction::Orientation::Horizontal;
 use cursive::direction::Orientation::Vertical;
 use cursive::event::Event;
 use cursive::event::Key::F2;
 use cursive::view::Nameable;
 use cursive::view::Resizable;
 use cursive::views::LinearLayout;
-use cursive::views::Panel;
 use cursive::views::TextArea;
-use cursive::views::TextView;
 
 pub(crate) fn run_editor(source: String) -> anyhow::Result<String> {
     let mut siv = cursive::default();
