@@ -12,7 +12,7 @@ impl Controller for IndexController {
     async fn handle(&self) -> anyhow::Result<()> {
         let result = run_editor("Hello".to_string());
 
-        println!("{}", result);
+        println!("{}", result.unwrap());
         Ok(())
     }
 }

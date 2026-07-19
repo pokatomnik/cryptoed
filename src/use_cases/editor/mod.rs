@@ -1,2 +1,2 @@
 pub(crate) mod editor;
-pub(crate) mod theme;
+pub(crate) mod widgets;

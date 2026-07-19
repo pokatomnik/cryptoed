@@ -4,6 +4,7 @@ use crate::{cmd::cli, controllers::controller::Controller};
 
 mod cmd;
 mod controllers;
+mod shared;
 mod use_cases;
 
 #[tokio::main]

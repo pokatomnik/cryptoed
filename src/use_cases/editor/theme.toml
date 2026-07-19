@@ -1,0 +1,29 @@
+# Monokai-inspired theme for Cursive 0.21.x
+#
+# Enable TOML theme support:
+# cursive = { version = "0.21", features = ["toml"] }
+#
+# Load with:
+# siv.load_toml(include_str!("monokai.toml")).unwrap();
+
+shadow = true
+borders = "simple"
+
+[colors]
+# Main surfaces
+background = ["#272822", "black"]
+view       = ["#272822", "black"]
+shadow     = ["#1E1F1C", "black"]
+
+# Regular text
+primary   = ["#F8F8F2", "white"]
+secondary = ["light black", "light black"]
+tertiary  = ["#75715E", "light black"]
+
+# Titles and accents
+title_primary   = ["#E6DB74", "yellow"]
+title_secondary = ["#F92672", "light red"]
+
+# Selection
+highlight          = ["#49483E", "light black"]
+highlight_inactive = ["#3E3D32", "black"]
