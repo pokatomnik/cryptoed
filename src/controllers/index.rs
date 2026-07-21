@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use clap::Args;
 use tokio::sync::OnceCell;
@@ -11,13 +12,13 @@ use crate::{
 
 const ENCRYPTED_EXT: &str = "encrypted";
 
-#[derive(Args)]
+#[derive(Args, Clone)]
 pub(crate) struct IndexController {
     /// Path to a file. Use ".encrypted" extension to encrypt a file
     path: PathBuf,
 
     #[clap(skip)]
-    password_crypto: OnceCell<PasswordCrypto>,
+    password_crypto: Arc<OnceCell<PasswordCrypto>>,
 }
 
 impl IndexController {
@@ -34,7 +35,7 @@ impl IndexController {
     }
 
     fn ask_password(&self, prompt: &str) -> anyhow::Result<String> {
-        let result = dialoguer::Input::<String>::new()
+        let result = dialoguer::Password::new()
             .with_prompt(prompt)
             .report(false)
             .interact()?;
@@ -68,18 +69,24 @@ impl IndexController {
     }
 
     fn write_file(
-        crypto: PasswordCrypto,
-        is_encrypted: bool,
+        &self,
         path: &Path,
         contents: &str,
         password: Option<&str>,
     ) -> anyhow::Result<()> {
+        let is_encrypted = self.is_encrypted(path);
+
         if !is_encrypted {
             std::fs::write(path, contents)?;
             return Ok(());
         }
 
         let password = password.ok_or_else(|| anyhow::anyhow!("Password is required"))?;
+        let crypto = self
+            .password_crypto
+            .get()
+            .copied()
+            .ok_or_else(|| anyhow::anyhow!("Password crypto is not initialized"))?;
         let encrypted = crypto.encrypt(contents.as_bytes(), password)?;
         std::fs::write(path, encrypted)?;
 
@@ -91,7 +98,6 @@ impl Controller for IndexController {
     async fn handle(&self) -> anyhow::Result<()> {
         let path = self.path.clone();
         let crypto = *self.get_password_crypto().await;
-        let is_encrypted = self.is_encrypted(path.as_path());
         let (decrypted_file_contents, password) = self.read_file(
             crypto,
             "This is encrypted text. Provide a password",
@@ -99,14 +105,13 @@ impl Controller for IndexController {
         )?;
 
         let save_path = path.clone();
+        let controller = self.clone();
         let save_password = password.clone();
         let result = run_editor(
             decrypted_file_contents,
             Some(path.to_string_lossy().to_string()),
             move |content| {
-                Self::write_file(
-                    crypto,
-                    is_encrypted,
+                controller.write_file(
                     save_path.as_path(),
                     content.as_str(),
                     save_password.as_deref(),
@@ -116,13 +121,7 @@ impl Controller for IndexController {
         )?;
 
         if result.need_save() {
-            Self::write_file(
-                crypto,
-                is_encrypted,
-                path.as_path(),
-                result.content(),
-                password.as_deref(),
-            )?;
+            self.write_file(path.as_path(), result.content(), password.as_deref())?;
         }
 
         Ok(())
