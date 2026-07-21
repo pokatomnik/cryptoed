@@ -62,6 +62,7 @@ impl EditorLayer {
         editor_view.get_modified()
     }
 
+    #[allow(unused)]
     pub fn set_title(&mut self, title: impl Into<String>) {
         let mut editor_view = self
             .layer

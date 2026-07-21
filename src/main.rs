@@ -9,11 +9,7 @@ mod use_cases;
 
 #[tokio::main]
 async fn main() {
-    let cli = cli::Cli::try_parse();
-    let Ok(cli) = cli else {
-        eprintln!("Failed to parse commandline arguments");
-        return;
-    };
+    let cli = cli::Cli::parse();
 
     let result = cli.index.handle().await;
 
