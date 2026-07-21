@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{controllers::controller::Controller, use_cases::editor::editor::run_editor};
+use crate::{controllers::controller::Controller, use_cases::editor::app_ui::run_editor};
 use clap::Args;
 
 #[derive(Args)]
@@ -10,9 +10,10 @@ pub(crate) struct IndexController {
 
 impl Controller for IndexController {
     async fn handle(&self) -> anyhow::Result<()> {
-        let result = run_editor("Hello".to_string());
+        let result = run_editor("Hello".to_string(), None::<String>)?;
 
-        println!("{}", result.unwrap());
+        println!("content: \"{}\"", result.content());
+        println!("need_save: {}", result.need_save());
         Ok(())
     }
 }
