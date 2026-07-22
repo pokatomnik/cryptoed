@@ -8,18 +8,25 @@ use crate::{
     use_cases::editor::app_ui::run_editor,
 };
 
-const ENCRYPTED_EXT: &str = "encrypted";
+const ENCRYPTED_EXT: &str = "enc";
 
-#[derive(Args)]
+#[derive(Args, Clone)]
 pub(crate) struct IndexController {
     /// Path to a file. Use ".encrypted" extension to encrypt a file
     path: PathBuf,
+
+    #[clap(long, short, default_value = ENCRYPTED_EXT, help = "Extension to use for encrypted files")]
+    encrypted_ext: String,
 }
 
 impl IndexController {
-    fn is_encrypted(pb: &Path) -> bool {
+    fn is_encrypted(&self, pb: &Path) -> bool {
         pb.extension()
-            .map(|e| e.to_string_lossy().to_string().ends_with(ENCRYPTED_EXT))
+            .map(|e| {
+                e.to_string_lossy()
+                    .to_string()
+                    .ends_with(self.encrypted_ext.as_str())
+            })
             .unwrap_or(false)
     }
 
@@ -33,12 +40,13 @@ impl IndexController {
     }
 
     fn read_file(
+        &self,
         crypto: PasswordCrypto,
         prompt: &str,
         path: &Path,
     ) -> anyhow::Result<(String, Option<String>)> {
         let data = std::fs::read(path).unwrap_or_default();
-        let encrypted = Self::is_encrypted(path);
+        let encrypted = self.is_encrypted(path);
 
         if !encrypted {
             return Ok((String::from_utf8(data)?, None));
@@ -57,12 +65,13 @@ impl IndexController {
     }
 
     fn write_file(
+        &self,
         crypto: PasswordCrypto,
         path: &Path,
         contents: &str,
         password: Option<&str>,
     ) -> anyhow::Result<()> {
-        let is_encrypted = Self::is_encrypted(path);
+        let is_encrypted = self.is_encrypted(path);
 
         if !is_encrypted {
             std::fs::write(path, contents)?;
@@ -81,7 +90,7 @@ impl Controller for IndexController {
     fn handle(&self) -> anyhow::Result<()> {
         let path = self.path.clone();
         let crypto = PasswordCrypto;
-        let (decrypted_file_contents, password) = Self::read_file(
+        let (decrypted_file_contents, password) = self.read_file(
             crypto,
             "This is encrypted text. Provide a password",
             path.as_path(),
@@ -89,11 +98,12 @@ impl Controller for IndexController {
 
         let save_path = path.clone();
         let save_password = password.clone();
+        let sclone = self.clone();
         let result = run_editor(
             decrypted_file_contents,
             Some(path.to_string_lossy().to_string()),
             move |content| {
-                Self::write_file(
+                sclone.write_file(
                     crypto,
                     save_path.as_path(),
                     content.as_str(),
@@ -104,7 +114,7 @@ impl Controller for IndexController {
         )?;
 
         if result.need_save() {
-            Self::write_file(
+            self.write_file(
                 crypto,
                 path.as_path(),
                 result.content(),
