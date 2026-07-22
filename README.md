@@ -93,3 +93,7 @@ There is no password recovery mechanism. Keep backups and store passwords safely
 
 - Email: [hugefast@gmail.com](mailto:hugefast@gmail.com)
 - Telegram: [@jesusscript](https://t.me/jesusscript)
+
+## License
+
+CryptoEd is free software licensed under the [GNU General Public License, version 3 or later](LICENSE).
