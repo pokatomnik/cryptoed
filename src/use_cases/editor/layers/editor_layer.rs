@@ -42,14 +42,17 @@ impl EditorLayer {
             )
             .with_name("editor_view"),
         );
+        content.add_fullscreen_layer(
+            PreviewView::new(text_to_edit.to_owned()).with_name("preview_view"),
+        );
 
         let layout = LinearLayout::new(Vertical)
             .child(content.with_name("content_view").full_screen())
-            .child(ShortcutView::new(selection_enabled, false).with_name("shortcut_view"))
+            .child(ShortcutView::new(selection_enabled, true).with_name("shortcut_view"))
             .full_screen();
         Self {
             layer: layout,
-            preview_enabled: false,
+            preview_enabled: true,
         }
     }
 
@@ -137,16 +140,15 @@ impl ViewWrapper for EditorLayer {
 
 #[cfg(test)]
 mod tests {
-    use cursive::{View, event::Event, view::Finder};
+    use cursive::{Vec2, View, event::Event, view::Finder};
 
     use super::EditorLayer;
     use crate::use_cases::editor::widgets::shortcut_view::ShortcutView;
 
     #[test]
-    fn preview_mode_does_not_edit_content() {
+    fn starts_in_preview_mode_and_does_not_edit_content() {
         let mut layer = EditorLayer::new("initial", None::<String>, false, |_| {});
 
-        layer.toggle_preview_mode();
         assert!(layer.get_preview_mode());
         assert!(
             layer
@@ -161,6 +163,24 @@ mod tests {
 
         layer.toggle_preview_mode();
         assert!(!layer.get_preview_mode());
+        assert!(
+            !layer
+                .layer
+                .find_name::<ShortcutView>("shortcut_view")
+                .expect("shortcut view should exist")
+                .get_preview_enabled()
+        );
         assert_eq!(layer.get_content(), "initial");
+    }
+
+    #[test]
+    fn long_content_does_not_expand_layer_past_available_height() {
+        let text = std::iter::repeat_n("line", 100)
+            .collect::<Vec<_>>()
+            .join("\n");
+        let mut layer = EditorLayer::new(&text, None::<String>, false, |_| {});
+        let available = Vec2::new(100, 10);
+
+        assert_eq!(layer.required_size(available).y, available.y);
     }
 }

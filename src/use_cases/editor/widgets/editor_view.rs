@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use cursive::{
-    Cursive, View,
+    Cursive, Vec2, View,
     event::{Event, EventResult},
     view::{Finder, Nameable, Resizable, ViewWrapper},
     views::{NamedView, Panel, ResizedView, TextArea},
@@ -119,6 +119,10 @@ impl EditorView {
 
 impl ViewWrapper for EditorView {
     wrap_impl!(self.panel: ResizedView<NamedView<Panel<ResizedView<NamedView<TextArea>>>>>);
+
+    fn wrap_required_size(&mut self, constraint: Vec2) -> Vec2 {
+        Vec2::min(self.panel.required_size(constraint), constraint)
+    }
 
     fn wrap_on_event(&mut self, event: Event) -> EventResult {
         let mut textarea = self
