@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.103"
 clap = { version = "4.6.1", features = ["derive"] }
-cursive = { version = "0.21.1", features = ["toml"] }
+cursive = { version = "0.21.1", features = ["markdown", "toml"] }
 futures-util = "0.3"
 tokio = { version = "1.52.3", features = ["full"] }
 argon2 = "0.5.3"

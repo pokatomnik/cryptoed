@@ -85,6 +85,12 @@ pub(crate) fn run_editor(
         _ = std::io::stdout().set_selection(editor_layer.get_selection_mode());
     });
 
+    siv.add_global_callback(Event::CtrlChar('r'), |s| {
+        s.find_name::<EditorLayer>("editor_layer")
+            .expect(VIEW_NOT_FOUND)
+            .toggle_preview_mode();
+    });
+
     let c = content.clone();
     siv.add_fullscreen_layer(
         EditorLayer::new(initial.as_str(), source, false, move |(s, changed)| {
