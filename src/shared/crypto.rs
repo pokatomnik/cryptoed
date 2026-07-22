@@ -33,12 +33,6 @@ pub trait Crypto {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct PasswordCrypto;
 
-impl PasswordCrypto {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
 impl Crypto for PasswordCrypto {
     fn encrypt(&self, bytes: &[u8], password: &str) -> anyhow::Result<Vec<u8>> {
         let mut salt = [0_u8; SALT_LEN];

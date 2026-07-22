@@ -7,11 +7,10 @@ mod controllers;
 mod shared;
 mod use_cases;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let cli = cli::Cli::parse();
 
-    let result = cli.index.handle().await;
+    let result = cli.index.handle();
 
     if let Err(e) = result {
         eprintln!("Failed to run editor: {e}");
